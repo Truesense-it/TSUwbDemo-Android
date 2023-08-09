@@ -1,0 +1,52 @@
+plugins {
+//    apply false
+    id 'com.android.application'
+
+
+
+}
+android {
+    compileSdkVersion 34
+
+    defaultConfig {
+        applicationId "it.truesense.uwbdemo"
+        minSdkVersion 31
+        targetSdkVersion 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+//            minifyEnabled false
+           // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation files('/home/pierpaolo/devel/TSUwbDemo/app/libs/FastBLE-2.3.4.jar')
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation "androidx.core.uwb:uwb:1.0.0-alpha06"
+    implementation "androidx.core.uwb:uwb-rxjava3:1.0.0-alpha06"
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
+    //implementation project(':FastBleLib')
+    // https://mvnrepository.com/artifact/com.clj.fastble/FastBleLib
+
+    //classpath 'com.android.tools.build:gradle:8.0.1'
+    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21"
+    //implementation 'com.hoho.android:usb-serial-for-android:2.0.0'
+}
+
+task wrapper(type: Wrapper){
+    gradleVersion = '7.2'
+}
+
+task prepareKotlinBuildScriptModel {
+
+}
