@@ -38,6 +38,7 @@
     <string name="disconnect">Disconnect</string>
     <string name="enter">Enter</string>
     <string name="distance">Distance: </string>
-    <string name="angle">Angle: </string>
+    <string name="angle">Azimuth: </string>
+    <string name="elevation">Elevation: </string>
 
 </resources>

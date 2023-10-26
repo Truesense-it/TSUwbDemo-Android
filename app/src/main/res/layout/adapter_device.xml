@@ -145,6 +145,21 @@
                 android:layout_marginEnd="5dp"
                 android:textColor="@color/colorPrimary"
                 android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/elevation"
+                android:textColor="@color/colorPrimary" />
+
+            <TextView
+                android:id="@+id/elvation_measure"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/colorPrimary" />
         </LinearLayout>
 
     </RelativeLayout>

@@ -145,6 +145,7 @@ public class DeviceAdapter extends BaseAdapter {
             holder.layout_measure=(LinearLayout) convertView.findViewById(R.id.layout_measure);
             holder.txt_distance = (TextView) convertView.findViewById(R.id.distance_measure);
             holder.txt_angle = (TextView) convertView.findViewById(R.id.angle_measure);
+            holder.txt_elevation = (TextView) convertView.findViewById(R.id.elvation_measure);
         }
         final UwbBleDevice uwbBleDevice = getItem(position);
         final BleDevice bleDevice = getItem(position).bleDev;
@@ -169,6 +170,8 @@ public class DeviceAdapter extends BaseAdapter {
                         holder.txt_distance.setText(Float.toString(uwbBleDevice.uwbPosition.getDistance().getValue()));
                     if(uwbBleDevice.uwbPosition.getAzimuth()!=null)
                         holder.txt_angle.setText(Float.toString(uwbBleDevice.uwbPosition.getAzimuth().getValue()));
+                    if(uwbBleDevice.uwbPosition.getElevation()!=null)
+                        holder.txt_elevation.setText(Float.toString(uwbBleDevice.uwbPosition.getElevation().getValue()));
                 }
 
             } else {
@@ -215,6 +218,8 @@ public class DeviceAdapter extends BaseAdapter {
 
         TextView txt_distance;
         TextView txt_angle;
+
+        TextView txt_elevation;
     }
 
     public interface OnDeviceClickListener {

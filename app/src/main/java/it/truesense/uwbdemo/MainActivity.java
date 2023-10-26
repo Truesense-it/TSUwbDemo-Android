@@ -570,13 +570,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 RangingResult.RangingResultPosition rangingResultPosition = (RangingResult.RangingResultPosition) rangingResult;
                                 RangingPosition pos = rangingResultPosition.getPosition();
                                 if (pos != null) {//rangingResultPosition.getPosition().getDistance() != null) {
-                                    float distance, azimuth;
+                                    float distance, azimuth,elevation;
                                     distance = 0;
                                     azimuth = 0;
+                                    elevation=0;
                                     if (pos.getDistance() != null)
                                         distance = pos.getDistance().getValue();
                                     if (pos.getAzimuth() != null)
                                         azimuth = pos.getAzimuth().getValue();
+                                    if(pos.getElevation() != null)
+                                        elevation = pos.getElevation().getValue();
                                     UwbBleDevice d = mDeviceAdapter.findByUwbAddr(rangingResult.getDevice().getAddress());
                                     if (d != null) {
                                         d.uwbPosition = pos;//rangingResultPosition;
@@ -592,6 +595,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     }
                                     Log.d(TAG, "Position distance: " + distance);
                                     Log.d(TAG, "Position azimuth: " + azimuth);
+                                    Log.d(TAG, "Position elevation: " + elevation);
                                 } else {
                                     Log.e(TAG, "Unexpected rangingResult value, distance is null!");
                                 }

@@ -37,7 +37,8 @@
     <string name="connected">已连接</string>
     <string name="disconnect">断开连接</string>
     <string name="enter">进入操作</string>
-    <string name="distance">Distance</string>
-    <string name="angle">Angle</string>
+    <string name="distance">Distance: </string>
+    <string name="angle">Azimuth: </string>
+    <string name="elevation">Elevation: </string>
 
 </resources>
