@@ -1,7 +1,4 @@
 package it.truesense.uwbdemo.utils;
-
-//import com.google.common.base.Ascii;
-
 public class Utils {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
