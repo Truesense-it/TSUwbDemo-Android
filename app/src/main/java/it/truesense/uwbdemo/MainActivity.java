@@ -1,6 +1,7 @@
 package it.truesense.uwbdemo;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CODE_OPEN_GPS = 1;
     private static final int REQUEST_CODE_PERMISSION_LOCATION = 2;
+    private static final int MY_PERMISSIONS_REQUEST_NEARBY_DEVICES = 3;
     private final int mUwbChannel = 9;
     private final int mUwbPreambleIndex = 10;
     ArrayList<UwbDevice> peerDevices;
@@ -112,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         PackageManager packageManager = getApplicationContext().getPackageManager();
         if (packageManager.hasSystemFeature("android.hardware.uwb")) {
             Log.d(TAG, "UWB hardware IS available!");
-            createUwbManagerLocalAdapter();
+            //createUwbManagerLocalAdapter();
 
 
         } else {
@@ -337,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                 //connection successfull, stop the progressDialog
                 progressDialog.dismiss();
-
+                createUwbManagerLocalAdapter();
                 //create the object to put in our list of connected devices
                 UwbBleDevice dev = new UwbBleDevice();
                 dev.bleDev = bleDevice;
@@ -570,15 +572,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 RangingResult.RangingResultPosition rangingResultPosition = (RangingResult.RangingResultPosition) rangingResult;
                                 RangingPosition pos = rangingResultPosition.getPosition();
                                 if (pos != null) {//rangingResultPosition.getPosition().getDistance() != null) {
-                                    float distance, azimuth,elevation;
+                                    float distance, azimuth, elevation;
                                     distance = 0;
                                     azimuth = 0;
-                                    elevation=0;
+                                    elevation = 0;
                                     if (pos.getDistance() != null)
                                         distance = pos.getDistance().getValue();
                                     if (pos.getAzimuth() != null)
                                         azimuth = pos.getAzimuth().getValue();
-                                    if(pos.getElevation() != null)
+                                    if (pos.getElevation() != null)
                                         elevation = pos.getElevation().getValue();
                                     UwbBleDevice d = mDeviceAdapter.findByUwbAddr(rangingResult.getDevice().getAddress());
                                     if (d != null) {
@@ -640,18 +642,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void createUwbManagerLocalAdapter() {
-        Thread t = new Thread(() -> {
-            mUwbManager = UwbManager.createInstance(getApplicationContext());
-            controleeSessionScopeSingle = UwbManagerRx.controleeSessionScopeSingle(mUwbManager);
-            controleeSessionScope = controleeSessionScopeSingle.blockingGet();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    //Log.d(TAG, "run: " + localAddress.toString());
-                }
+        if(mUwbManager ==null) {
+            Thread t = new Thread(() -> {
+                mUwbManager = UwbManager.createInstance(getApplicationContext());
+                controleeSessionScopeSingle = UwbManagerRx.controleeSessionScopeSingle(mUwbManager);
+                controleeSessionScope = controleeSessionScopeSingle.blockingGet();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Log.d(TAG, "run: " + localAddress.toString());
+                    }
+                });
             });
-        });
-        t.start();
+            t.start();
+        }
     }
 
     @Override
@@ -659,58 +663,111 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                                  @NonNull String[] permissions,
                                                  @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case REQUEST_CODE_PERMISSION_LOCATION:
-                if (grantResults.length > 0) {
-                    for (int i = 0; i < grantResults.length; i++) {
-                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                            onPermissionGranted(permissions[i]);
-                        }
-                    }
+        Log.d(TAG, "onRequestPermissionsResult: requestCode: " + requestCode + " permissions: " + permissions.toString() +" grantResults" + grantResults.toString());
+
+        if (grantResults.length > 0) {
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    onPermissionGranted(permissions[i]);
+                } else {
+                    Log.d(TAG, "onRequestPermissionsResult: grant denied: " + grantResults[i] + " for: " + permissions[i]);
                 }
-                break;
+            }
+        } else {
+            Log.d(TAG, "onRequestPermissionsResult: grants not received for request " + requestCode);
+            for(int j=0;j<permissions.length;j++)
+                Log.d(TAG, "onRequestPermissionsResult: permission " + permissions[j].toString());
         }
     }
 
+    private void showPermissionExplanationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Permission Required");
+        builder.setMessage("This app needs Bluetooth permissions to discover and connect to nearby devices for its features to work properly.");
+
+        builder.setPositiveButton("OK", (dialog, id) -> {
+            // User clicked OK, so request the permissions
+            requestNearbyDevicePermissions();
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, id) -> {
+            // User cancelled the dialog, handle possibly limited functionality
+            dialog.dismiss();
+            Toast.makeText(this, "Permissions are necessary for full functionality.", Toast.LENGTH_SHORT).show();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showUWBPermissionExplanationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Permission Required");
+        builder.setMessage("This app needs Bluetooth permissions to discover and connect to nearby devices for its features to work properly.");
+
+        builder.setPositiveButton("OK", (dialog, id) -> {
+            // User clicked OK, so request the permissions
+            requestNearbyDevicePermissions();
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, id) -> {
+            // User cancelled the dialog, handle possibly limited functionality
+            dialog.dismiss();
+            Toast.makeText(this, "Permissions are necessary for full functionality.", Toast.LENGTH_SHORT).show();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void requestPermissionsIfNeeded() {
+        if (shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_SCAN) ||
+                shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_CONNECT) ||
+                shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_ADVERTISE) ||
+                shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            // Show rationale dialog before requesting permissions
+            showPermissionExplanationDialog();
+        } else {
+            // No explanation needed; request the permissions directly
+            requestNearbyDevicePermissions();
+        }
+    }
+
+    private void requestNearbyDevicePermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[] {
+                        Manifest.permission.BLUETOOTH_SCAN,
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        Manifest.permission.BLUETOOTH_ADVERTISE,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                },
+                MY_PERMISSIONS_REQUEST_NEARBY_DEVICES);
+    }
+
     private void checkPermissions() {
+        Activity currentActivity = this;
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (!bluetoothAdapter.isEnabled()) {
             Toast.makeText(this, getString(R.string.please_open_blue), Toast.LENGTH_LONG).show();
             return;
         }
-
-        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.UWB_RANGING,/* Manifest.permission.NEARBY_WIFI_DEVICES,*/ Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
-        List<String> permissionDeniedList = new ArrayList<>();
-        for (String permission : permissions) {
-            int permissionCheck = ContextCompat.checkSelfPermission(this, permission);
-            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-                onPermissionGranted(permission);
-            } else {
-                permissionDeniedList.add(permission);
+        //for android 14 onwards request UWB_RANGING permission
+        if (Build.VERSION.SDK_INT >= 31) {
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.UWB_RANGING) != PackageManager.PERMISSION_GRANTED) {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.UWB_RANGING))
+                    showUWBPermissionExplanationDialog();
+                else
+                    ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.UWB_RANGING}, 320);
             }
         }
-        if (!permissionDeniedList.isEmpty()) {
-            String[] deniedPermissions = permissionDeniedList.toArray(new String[permissionDeniedList.size()]);
-            ActivityCompat.requestPermissions(this, deniedPermissions, REQUEST_CODE_PERMISSION_LOCATION);
-        }
+
+        //request the other permissions needed
+        requestPermissionsIfNeeded();
+
     }
 
     private void onPermissionGranted(String permission) {
         switch (permission) {
-//            case Manifest.permission.BLUETOOTH_SCAN:
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//                    String[] perms={ Manifest.permission.BLUETOOTH_SCAN,
-//                            Manifest.permission.BLUETOOTH_CONNECT};
-//                    ActivityCompat.requestPermissions(this,perms,REQUEST_CODE_PERMISSION_LOCATION);
-//
-//                }
-//                else{
-//                    //Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-//                    //startActivityForResult(intent, BluetoothAdapter.);
-//                    //val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-//                    //requestBluetooth.launch(enableBtIntent)
-//                }
-//                break;
             case Manifest.permission.ACCESS_FINE_LOCATION:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkGPSIsOpen()) {
                     new AlertDialog.Builder(this)
@@ -739,6 +796,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startScan();
                 }
                 break;
+            default: {
+//                setScanRule();
+//                startScan();
+                break;
+            }
         }
     }
 
