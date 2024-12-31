@@ -23,15 +23,15 @@ android {
     }
     buildTypes {
         release {
-//            minifyEnabled false
-           // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // minifyEnabled false
+            // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     namespace 'it.truesense.uwbdemo'
 }
 
 dependencies {
-    implementation files('/home/pierpaolo/devel/TSUwbDemo/app/libs/FastBLE-2.3.4.jar')
+    implementation files('libs/FastBLE-2.3.4.jar')
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
 
@@ -40,10 +40,6 @@ dependencies {
     implementation "androidx.core.uwb:uwb:1.0.0-alpha08"
     implementation "androidx.core.uwb:uwb-rxjava3:1.0.0-alpha08"
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
-    //
-    // implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
-
-
 }
 
 //task wrapper(type: Wrapper){
