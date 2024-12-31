@@ -240,9 +240,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 }
                 if (BleManager.getInstance().isConnected(bleDevice.bleDev)) {
-                    BleManager.getInstance().disconnect(bleDevice.bleDev);
+                    //BleManager.getInstance().disconnect(bleDevice.bleDev);
 
-                    stopRanging();
+                    //stopRanging();
+
+                    BleManager.getInstance().write(
+                            bleDevice.bleDev,
+                            "6E400001-B5A3-F393-E0A9-E50E24DCCA9E",
+                            "6E400002-B5A3-F393-E0A9-E50E24DCCA9E",
+                            HexUtil.hexStringToBytes("0C"),
+                            new BleWriteCallback() {
+                                @Override
+                                public void onWriteSuccess(int current, int total, byte[] justWrite) {
+                                    Log.d(TAG, "onWriteSuccess: ");
+                                }
+
+                                @Override
+                                public void onWriteFailure(BleException exception) {
+                                    Log.d(TAG, "onWriteFailure: ");
+                                }
+                            });
+
                 }
                 btn_scan.setVisibility(View.VISIBLE);
                 if (btn_scan.getText().equals(getString(R.string.start_scan))) {
@@ -454,7 +472,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         byte[] sessionKey = {0x8, 0x7, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6}; //that's what the firmware wants for VendorID and STS_IV
                                         byte[] subSessionKey = {};
                                         //RangingParameters rangingParameters = new RangingParameters(selectUwbProfileId, sessionId,0,sessionKey, subSessionKey,uwbComplexChannel, peerDevices, RangingParameters.RANGING_UPDATE_RATE_AUTOMATIC);
-                                        RangingParameters rangingParameters = new RangingParameters(selectUwbProfileId, sessionId, 0, sessionKey, null, uwbComplexChannel, peerDevices, RangingParameters.RANGING_UPDATE_RATE_FREQUENT);
+                                        RangingParameters rangingParameters = new RangingParameters(selectUwbProfileId, sessionId, 0, sessionKey, null, uwbComplexChannel, peerDevices, /*RangingParameters.RANGING_UPDATE_RATE_INFREQUENT);*/ RangingParameters.RANGING_UPDATE_RATE_FREQUENT);
 
                                         //determine the flowable to use
                                         if (selectUwbDeviceRangingRole == 0) {
